@@ -1,0 +1,23 @@
+# Caches Python e ambientes virtuais
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.venv/
+venv/
+env/
+
+# Arquivos de estado efêmero da memória episódica e logs locais
+.maestro_memory.json
+*_memory.json
+*.log
+/tmp/
+
+# Segurança Estrita Homelab: bloquear credenciais, chaves e arquivos .env reais
+.env
+*.env
+*.env.real
+*.env.local
+*.key
+*authkey*
+*credentials*
