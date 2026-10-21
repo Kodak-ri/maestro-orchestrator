@@ -79,6 +79,106 @@ OMV_CANONICAL_STACKS: Dict[str, Dict[str, str]] = {
     },
 }
 
+# Curated resilient knowledge base (in-memory fallback when container lacks /work mounts)
+HOMELAB_KNOWLEDGE_BASE: List[Dict[str, Any]] = [
+    {
+        "id": "github_kodak_ecosystem",
+        "title": "Ecossistema Oficial de Repositórios GitHub (@Kodak-ri)",
+        "keywords": [
+            "github", "repositorio", "repositório", "repos", "repo",
+            "kodak-ri", "git", "commit", "push", "pull request", "issue", "maestro",
+        ],
+        "content": (
+            "Repositórios Oficiais (@Kodak-ri):\n"
+            "1. Kodak-ri/maestro-orchestrator: Orquestrador Híbrido v2.0 (Roteador Semântico, Memória Híbrida Hy-Memory e Meta-Prompter AGY).\n"
+            "2. Kodak-ri/omv-relatorios-agente: Diário de bordo, entregas (/work/entregas/), automação AGY Watcher e esteira CI.\n"
+            "3. Kodak-ri/omv-server-docs: Fonte Única da Verdade GitOps do OMV 8.5 (DOCUMENTACAO_COMPLETA_OMV.md, docs/ e stacks-exemplo/).\n"
+            "4. Kodak-ri/kodak-homelab-projects: Hardware Bazzite RTX 3060 Ti, modding Smart TV LG webOS (kodachi), Pocophone F1 e Archer C5.\n"
+            "5. Kodak-ri/tcc-bot: Microsserviço ACH Heuer OSINT com cascata Gemini 2.5/2.0/1.5 e Gunicorn WSGI (porta 5051).\n"
+            "6. Kodak-ri/steam-indie-deals: Radar automatizado de promoções Indie na Steam com alertas HTML por e-mail.\n"
+            "7. Kodak-ri/RI-BOT & Kodak-ri/stack-arr-docs: Repositórios históricos padronizados."
+        ),
+    },
+    {
+        "id": "omv_storage_system",
+        "title": "OpenMediaVault 8.5 & Storage Pools MergerFS",
+        "keywords": [
+            "omv", "servidordokodak", "mergerfs", "pool_koda", "pool_cofre",
+            "armazenamento", "disco", "swap", "ram", "memoria", "docker_data",
+        ],
+        "content": (
+            "Host OMV: servidordokodak (OpenMediaVault 8.5.11-1 sobre Debian 13.7 trixie).\n"
+            "Recursos: CPU x86_64, 7.6 GiB RAM física + 4.0 GiB Swapfile ativo em /dev/sdb1.\n"
+            "Pools MergerFS:\n"
+            "- /srv/mergerfs/pool_koda (2.7 TB): mídias, ROMs e dados vivos de containers.\n"
+            "- /srv/mergerfs/pool_cofre (916 GB): fotos pessoais e backups críticos (alta proteção).\n"
+            "Caminho Canônico Vivo: /srv/mergerfs/pool_koda/docker_data/<stack>/ (proibido usar appdata/ ou /srv/dev-disk-by-uuid-*/)."
+        ),
+    },
+    {
+        "id": "docker_network_komodo",
+        "title": "Docker Compose, Rede kodak-net & Komodo GitOps",
+        "keywords": [
+            "docker", "compose", "rede", "network", "kodak-net",
+            "komodo", "gitops", "ferretdb", "deploy", "mem_limit",
+        ],
+        "content": (
+            "Governança Docker & Komodo GitOps no OMV:\n"
+            "- Rede externa obrigatória: networks: kodak-net (external: true). Proibido misturar com network_mode: bridge.\n"
+            "- Limites obrigatórios: todo serviço deve declarar mem_limit e mem_reservation compatíveis com os 7.6 GiB do OMV.\n"
+            "- Identidade estrita: todo Compose deve conter 'name: <PROJECT_NAME_REAL>' (media-stack, ts, romm-stack, tcc-bot, immich, komodo, jdownloader, management).\n"
+            "- Komodo GitOps (http://<IP_SERVIDOR>:9120): FerretDB v1 (SQLite) + Core + Periphery (~25.13 MiB RAM total) sincronizado com Kodak-ri/omv-server-docs."
+        ),
+    },
+    {
+        "id": "active_stacks_omv",
+        "title": "Stacks em Produção e Homologadas no OMV",
+        "keywords": [
+            "media", "qbittorrent", "flaresolverr", "jellyfin", "navidrome",
+            "teamspeak", "ts", "tcc-bot", "immich", "jdownloader", "romm", "homarr",
+        ],
+        "content": (
+            "Catálogo de Stacks OMV (/srv/mergerfs/pool_koda/docker_data/):\n"
+            "1. media-stack: qBittorrent v5.2.4 (mem_limit: 2048m, libtorrent v2), FlareSolverr v3.5.2, Jellyfin (:8096), Navidrome (:4533), Prowlarr (:9696), Radarr (:7878), Sonarr (:8989).\n"
+            "2. ts: TeamSpeak 6 Server (TSSERVER_LICENSE_ACCEPTED=accept, mem_limit: 512m).\n"
+            "3. tcc-bot: Motor ACH OSINT (:5051, Gunicorn WSGI, non-root UID 10001, mem_limit: 512m).\n"
+            "4. immich: Fotos (:2283, Postgres VectorChord 1024m, Server 1536m, ML 1536m, Valkey 256m).\n"
+            "5. romm-stack: Emulação retrô (:8082, MariaDB, mem_limit: 1024m).\n"
+            "6. management: Homarr Dashboard (:7575, mem_limit: 512m).\n"
+            "7. jdownloader: JDownloader 2 (:5800, mem_limit: 1024m)."
+        ),
+    },
+    {
+        "id": "tv_lg_webos",
+        "title": "Smart TV LG 49UF6400-SA (kodachi / webOS 4.1.0)",
+        "keywords": [
+            "tv", "lg", "kodachi", "webos", "49uf6400", "ssap",
+            "websocket", "webkit", "upnp", "dial", "luna", "performance", "moonlight",
+        ],
+        "content": (
+            "Smart TV LG 49UF6400-SA (hostname: kodachi, webOS 4.1.0 armv7l, IP <IP_LAN_TV>):\n"
+            "- Portas ativas: 9922 (Dev Mode SSH), 3000/3001 (SSAP WebSocket), 9998 (WebKit Inspector), 36866 (DIAL REST), 1668 (UPnP DMR).\n"
+            "- Arquitetura Anti-Brick: mods 100% em RAM (tmpfs /var/log, ZRAM 512MB, mount --bind sem escrita na eMMC).\n"
+            "- Certificados SSL: overlay em /etc/ssl/certs/ca-certificates.crt (ISRG Root X1/X2 + DigiCert G2).\n"
+            "- Utilitários Bazzite: /usr/local/bin/kodachi-ctl e /usr/local/bin/webos-mod-studio."
+        ),
+    },
+    {
+        "id": "bazzite_host_gpu",
+        "title": "Host Bazzite Linux & NVIDIA RTX 3060 Ti (8 GB VRAM)",
+        "keywords": [
+            "bazzite", "gpu", "rtx", "3060", "nvidia", "ollama",
+            "kodak-coder", "vram", "inferencia", "nomic-embed-text", "opencode",
+        ],
+        "content": (
+            "Estação de IA Local (Host Bazzite Linux + GPU NVIDIA GeForce RTX 3060 Ti 8 GB GDDR6):\n"
+            "- Endpoint Ollama: http://host.containers.internal:11434 (ou http://127.0.0.1:11434).\n"
+            "- Modelos Locais: kodak-coder:latest (~70 tokens/s, ~4.7 GB VRAM), qwen2.5-coder:7b e nomic-embed-text:latest (768d embeddings).\n"
+            "- Fallback Nuvem / Modo Jogo: opencode/deepseek-v4.1-flash-free (200k contexto) acionado automaticamente quando a GPU está dedicada a jogos (Sunshine/Moonlight)."
+        ),
+    },
+]
+
 ROUTE_EXEMPLARS: Dict[str, List[str]] = {
     "WORKER_LOCAL_GPU": [
         "Escreva um script Python ou Bash para automatizar backups e processar arquivos JSON",
@@ -447,6 +547,34 @@ class Pipe:
                         }
                     )
 
+        # Fallback para base de conhecimento curada em memória (containers isolados ou ausência de /work)
+        if not scored:
+            for item in HOMELAB_KNOWLEDGE_BASE:
+                t_low = item["title"].lower()
+                c_low = item["content"].lower()
+                k_low = [k.lower() for k in item.get("keywords", [])]
+                score = 0.0
+                for w in words:
+                    if w in t_low:
+                        score += 6.0
+                    if any(w in k for k in k_low):
+                        score += 5.0
+                    cnt = c_low.count(w)
+                    if cnt > 0:
+                        score += min(cnt, 5) * 1.5
+                if score > 0:
+                    for pat in HIGH_SIGNAL_PATTERNS:
+                        if re.search(pat, c_low):
+                            score += 1.5
+                    scored.append(
+                        {
+                            "score": round(score, 2),
+                            "file": f"in-memory:{item['id']}",
+                            "title": item["title"],
+                            "content": item["content"].strip(),
+                        }
+                    )
+
         scored.sort(key=lambda x: x["score"], reverse=True)
         top_sections = scored[:max_sections]
         if not top_sections:
@@ -585,10 +713,10 @@ class Pipe:
 
         agy_rules = [
             (r"\b(ssh\s+omv|ssh\s+labvm|agente-ler|agente-docker)\b", 4.5, "Comando SSH/Agente OMV"),
-            (r"\b(git\s+push|pull\s+request|criar\s+issue|abrir\s+issue)\b", 4.0, "Operação GitOps remota"),
+            (r"\b(git\s+push|pull\s+request|pr\b|cria[r|e]\s+(uma\s+)?(issue|pr)|abri[r|a]\s+(uma\s+)?(issue|pr))\b", 4.5, "Operação GitOps remota"),
             (r"\b(fstab|swapfile|rrdcached|volume\s+prune|particao|systemd)\b", 4.0, "Manutenção de nível host"),
             (r"\b(homologar\s+na\s+labvm|subir\s+na\s+labvm|deploy\s+no\s+komodo)\b", 4.5, "Homologação LabVM/Komodo"),
-            (r"\b(labvm|reiniciar\s+container|diagnosticar\s+servidor)\b", 3.0, "Intervenção ativa em servidor"),
+            (r"\b(labvm|reiniciar\s+container|reinicie|restart|docker\s+restart|logs|suba|subir|pare|derrube|diagnosticar\s+servidor)\b", 4.0, "Intervenção ativa em servidor"),
         ]
         for pat, w, label in agy_rules:
             if re.search(pat, q_low):
@@ -624,7 +752,7 @@ class Pipe:
 
         # Desambiguação: pergunta pura sobre OMV sem verbo de mutação -> HOMELAB_RAG
         if scores["HOMELAB_RAG"] >= 4.0 and scores["CIRURGIAO_AGY"] <= 3.0:
-            if not re.search(r"\b(altere|modifique|aplique|reinicie|conecte|rode|execute|corrija\s+no\s+omv|ssh)\b", q_low):
+            if not re.search(r"\b(altere|modifique|aplique|reinicie|restart|suba|subir|pare|derrube|conecte|rode|execute|logs|corrija\s+no\s+omv|ssh)\b", q_low):
                 scores["HOMELAB_RAG"] += 1.5
 
         # Afinidade de Sessão Multi-Turno (para perguntas curtas de continuação)
