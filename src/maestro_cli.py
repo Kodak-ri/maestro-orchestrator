@@ -26,11 +26,13 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 # Garante que o pacote `src` do Maestro v2.0 seja encontrado tanto via symlink
-# (/usr/local/bin/maestro -> /work/automacao/maestro.py) quanto no repositório
-MAESTRO_REPO_ROOT = "/work/maestro-orchestrator"
+# (/usr/local/bin/maestro -> /work/automacao/maestro.py) quanto no repositório de forma dinâmica e portável
+current_path = Path(__file__).resolve()
+repo_root = current_path.parent.parent if current_path.parent.name == "src" else current_path.parent
 for candidate in [
-    str(Path(__file__).resolve().parent.parent),
-    MAESTRO_REPO_ROOT,
+    str(repo_root),
+    str(current_path.parent),
+    "/work/maestro-orchestrator",
     "/work/automacao",
 ]:
     if os.path.isdir(candidate) and candidate not in sys.path:
@@ -328,6 +330,7 @@ def execute_opencode_fallback(query: str, compressed_rag: str = "", reason_label
     prompt_parts = [
         "Você é o Kodak Coder / Maestro v2.0, especialista em Linux Debian, Docker, Python, Bash e Homelab OMV.",
         "Responda de forma técnica, direta, enxuta e pronta para produção. Mantenha sanitização rigorosa (<IP_SERVIDOR>, <SENHA>).",
+        "IMPORTANTE: Não tente acionar ferramentas interativas ou busca web externa; responda exclusivamente com sua base de conhecimento e raciocínio técnico interno.",
     ]
     if compressed_rag:
         prompt_parts.append(f"\n[CONTEXTO HOMELAB COMPRIMIDO (HY-MEMORY)]:\n{compressed_rag}")
@@ -340,8 +343,8 @@ def execute_opencode_fallback(query: str, compressed_rag: str = "", reason_label
             ["opencode", "run", "-m", OPENCODE_MODEL, full_prompt],
             capture_output=True,
             text=True,
-            timeout=90,
-            cwd="/work",
+            timeout=60,
+            cwd=str(repo_root),
         )
         elapsed = time.time() - t0
         output = (proc.stdout or "").strip()
@@ -510,6 +513,7 @@ def execute_agy_surgeon(
 
     if run_agy:
         print(f"{C_BOLD}{C_YELLOW}[*] Flag --run-agy detectada! Disparando AGY CLI em modo autônomo...{C_RESET}")
+        effort_level = decision.get("thinking", "medium").lower()
         cmd = [
             "agy",
             "--dangerously-skip-permissions",
@@ -517,9 +521,11 @@ def execute_agy_surgeon(
             super_prompt,
             "--mode",
             "auto",
+            "--effort",
+            effort_level,
         ]
         try:
-            subprocess.run(cmd, cwd="/work")
+            subprocess.run(cmd, cwd=str(repo_root))
         except Exception as e:
             print(f"{C_RED}[ERRO] Falha ao disparar AGY: {e}{C_RESET}")
 
@@ -717,8 +723,10 @@ def main() -> None:
     )
     if args.thinking:
         decision["thinking"] = args.thinking
-    if args.super_prompt:
+    if args.super_prompt or args.run_agy or args.issue:
         decision["route"] = "CIRURGIAO_AGY"
+        if args.run_agy or args.issue:
+            decision["reason"] = f"Override explícito via flag CLI ({'--run-agy' if args.run_agy else '--issue'})"
 
     if args.explain_route:
         print_route_explanation(decision)
