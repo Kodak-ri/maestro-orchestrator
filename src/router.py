@@ -79,6 +79,13 @@ AGY_TRIGGERS = [
     "deploy-suite", "git push", "sincronizar repos", "revisar repos",
     "padronizar repos", "todos os repositorios", "todos os repositórios",
     "revisao em todas as repos", "revisão em todas as repos",
+    "abrir uma issue", "abra uma issue", "abra issue", "crie uma issue", "crie issue",
+    "criar uma issue", "abertura de issue", "abrir um pr", "abrir uma pr",
+    "abra um pr", "abra uma pr", "crie um pr", "crie uma pr", "criar um pr", "criar uma pr",
+    "suba a stack", "subir a stack", "suba o container", "subir o container",
+    "reinicie o container", "reiniciar o container", "reinicie a stack", "reiniciar a stack",
+    "docker restart", "docker stop", "docker logs", "docker up", "compose up",
+    "verifique os logs", "verificar os logs", "logs do container", "derrube a stack",
 ]
 
 AGY_ACTION_VERBS = [
@@ -86,6 +93,8 @@ AGY_ACTION_VERBS = [
     "criar", "publicar", "commitar", "auditar", "corrigir", "homologar",
     "instalar", "aplicar", "executar", "rodar", "verificar no servidor",
     "conferir no omv", "subir na labvm", "fazer deploy",
+    "abrir", "abra", "abertura", "crie", "subir", "suba", "reiniciar", "reinicie",
+    "restart", "parar", "pare", "derrubar", "derrube",
 ]
 
 OPENCODE_TRIGGERS = [
@@ -288,8 +297,8 @@ class HybridCascadeRouter:
                 scores[ROUTE_AGY] += 0.65
                 matched_signals[ROUTE_AGY].append(f"hist:{trig}")
 
-        # Check combination of GitHub/Repo terms + Action Verbs -> CIRURGIAO_AGY
-        if any(r in combined for r in ["github", "repositorio", "repositório", "repos", "repo"]):
+        # Check combination of GitHub/Repo/GitOps terms + Action Verbs -> CIRURGIAO_AGY
+        if any(r in combined for r in ["github", "repositorio", "repositório", "repos", "repo", "issue", "issues", "pr", "prs"]):
             if any(v in combined for v in AGY_ACTION_VERBS):
                 scores[ROUTE_AGY] += 0.85
                 matched_signals[ROUTE_AGY].append("github+action_verb")
@@ -303,13 +312,30 @@ class HybridCascadeRouter:
                 scores[ROUTE_OPENCODE] += 0.55
                 matched_signals[ROUTE_OPENCODE].append(f"hist:{trig}")
 
-        # 3. Check Homelab RAG Triggers (only when not overridden by AGY executive command)
+        # Check if query contains infra mutation/management actions on homelab containers/stacks
+        has_infra_action = any(
+            v in q_low
+            for v in [
+                "suba", "subir", "reinicie", "reiniciar", "restart", "pare", "parar",
+                "derrube", "derrubar", "logs", "corrija", "corrigir",
+                "docker restart", "docker stop", "docker logs", "docker up",
+                "compose up", "compose down", "compose restart",
+            ]
+        )
+        if has_infra_action and any(t in q_low for t in RAG_TRIGGERS) and scores[ROUTE_AGY] < 0.80:
+            scores[ROUTE_AGY] += 0.85
+            matched_signals[ROUTE_AGY].append("infra_action_on_stack")
+
+        # 3. Check Homelab RAG Triggers (only for informational queries, not active mutations)
         for trig in RAG_TRIGGERS:
             pat = r"\b" + re.escape(trig) + r"\b"
             if re.search(pat, q_low):
-                # If user is asking a question or consulting architecture without SSH/AGY action
-                scores[ROUTE_RAG] += 0.80
-                matched_signals[ROUTE_RAG].append(trig)
+                if not has_infra_action:
+                    scores[ROUTE_RAG] += 0.80
+                    matched_signals[ROUTE_RAG].append(trig)
+                else:
+                    scores[ROUTE_RAG] += 0.20
+                    matched_signals[ROUTE_RAG].append(f"infra_context:{trig}")
             elif re.search(pat, combined):
                 scores[ROUTE_RAG] += 0.45
                 matched_signals[ROUTE_RAG].append(f"hist:{trig}")

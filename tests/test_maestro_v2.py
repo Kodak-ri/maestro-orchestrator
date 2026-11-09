@@ -187,6 +187,40 @@ class TestMaestroV2Suite(unittest.TestCase):
             server.shutdown()
             server.server_close()
 
+    def test_08_router_bypass_fixes_for_gitops_and_infra_actions(self):
+        """Valida correções de bypass apontadas nas issues #2 e #3."""
+        cases = [
+            ("abra uma issue no github", "CIRURGIAO_AGY"),
+            ("crie uma issue reportando bug", "CIRURGIAO_AGY"),
+            ("abra um PR no repositorio", "CIRURGIAO_AGY"),
+            ("suba a stack romm no omv", "CIRURGIAO_AGY"),
+            ("reinicie o container immich no omv", "CIRURGIAO_AGY"),
+            ("docker restart jellyfin", "CIRURGIAO_AGY"),
+            ("verifique os logs do container immich", "CIRURGIAO_AGY"),
+        ]
+        for query, expected in cases:
+            dec = self.router.route(query)
+            self.assertEqual(
+                dec["route"],
+                expected,
+                f"Bypass detectado para '{query}': esperado {expected}, obtido {dec['route']} (stage={dec['stage']})",
+            )
+
+    def test_09_openwebui_pipe_in_memory_fallback(self):
+        """Valida fallback in-memory da base Homelab no pipe quando caminhos de disco não existem (issue #4)."""
+        pipe = Pipe()
+        pipe.valves.RAG_DOCS_PATHS = "/nonexistent/path/doc.md"
+        top_sections, compressed_text, metrics = pipe._query_and_compress_rag("qual a configuracao de swap e ram do omv?")
+        self.assertGreater(len(top_sections), 0, "Deveria retornar seções da base in-memory HOMELAB_KNOWLEDGE_BASE")
+        self.assertIn("in-memory:", top_sections[0]["file"])
+        self.assertIn("7.6 GiB RAM", compressed_text)
+
+    def test_10_dynamic_path_resolution(self):
+        """Valida resolução de caminho dinâmico em maestro_cli (issue #7)."""
+        from src.maestro_cli import repo_root
+        self.assertTrue(Path(repo_root).is_dir())
+        self.assertTrue((Path(repo_root) / "src" / "maestro_cli.py").exists())
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
